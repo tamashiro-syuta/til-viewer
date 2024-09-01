@@ -11,7 +11,7 @@ import { Props } from ".";
 export default function TopBar({ open, toggleDrawer }: Props) {
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static" sx={{ height: 63 }}>
+      <AppBar position="static">
         <Toolbar>
           <IconButton
             size="large"
