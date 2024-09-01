@@ -5,6 +5,8 @@ import Link from "@/components/link";
 export default async function Home() {
   const articles = await fetchAllArticles();
 
+  console.log(articles);
+
   return (
     <List>
       <Divider />
