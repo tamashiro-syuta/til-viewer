@@ -10,7 +10,11 @@ import InboxIcon from "@mui/icons-material/MoveToInbox";
 import MailIcon from "@mui/icons-material/Mail";
 import { Props } from ".";
 
-export default function Drawer({ open, toggleDrawer }: Props) {
+interface DrawerProps extends Props {
+  genres: string[];
+}
+
+export default function Drawer({ open, toggleDrawer, genres }: DrawerProps) {
   return (
     <div>
       <SwipeableDrawer
@@ -26,28 +30,18 @@ export default function Drawer({ open, toggleDrawer }: Props) {
           onKeyDown={toggleDrawer(false)}
         >
           <List>
-            {["Inbox", "Starred", "Send email", "Drafts"].map((text, index) => (
-              <ListItem key={text} disablePadding>
-                <ListItemButton>
-                  <ListItemIcon>
-                    {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                  </ListItemIcon>
-                  <ListItemText primary={text} />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
-          <Divider />
-          <List>
-            {["All mail", "Trash", "Spam"].map((text, index) => (
-              <ListItem key={text} disablePadding>
-                <ListItemButton>
-                  <ListItemIcon>
-                    {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                  </ListItemIcon>
-                  <ListItemText primary={text} />
-                </ListItemButton>
-              </ListItem>
+            {genres.map((text, index) => (
+              <div key={`drawer-genres-${index}`}>
+                <ListItem>
+                  <ListItemButton>
+                    <ListItemIcon>
+                      {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+                    </ListItemIcon>
+                    <ListItemText primary={text} />
+                  </ListItemButton>
+                </ListItem>
+                <Divider />
+              </div>
             ))}
           </List>
         </Box>

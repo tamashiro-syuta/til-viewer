@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import Drawer from "../drawer";
-import TopBar from "../top-bar";
+import { Suspense, useEffect, useState } from "react";
+import TopBar from "./top-bar";
+import Drawer from "./drawer";
+import { fetchGenres } from "@/app/actions/repository";
 
 export interface Props {
   open: boolean;
@@ -13,16 +14,25 @@ export interface Props {
 
 const AppBar = () => {
   const [open, setOpen] = useState(false);
+  const [genres, setGenres] = useState<string[]>([]);
 
   const toggleDrawer =
     (open: boolean) => (_: React.KeyboardEvent | React.MouseEvent) => {
       setOpen(open);
     };
 
+  useEffect(() => {
+    const fetch = async () => {
+      const genres = await fetchGenres();
+      setGenres(genres);
+    };
+    fetch();
+  }, []);
+
   return (
     <div>
       <TopBar open={open} toggleDrawer={toggleDrawer} />
-      <Drawer open={open} toggleDrawer={toggleDrawer} />
+      <Drawer open={open} toggleDrawer={toggleDrawer} genres={genres} />
     </div>
   );
 };
