@@ -7,6 +7,7 @@ import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import { APP_NAME } from "@/constants";
 import { Props } from ".";
+import Link from "next/link";
 
 export default function TopBar({ open, toggleDrawer }: Props) {
   return (
@@ -18,14 +19,22 @@ export default function TopBar({ open, toggleDrawer }: Props) {
             edge="start"
             color="inherit"
             aria-label="menu"
-            sx={{ mr: 2 }}
+            sx={{ mr: 1 }}
             onClick={toggleDrawer(!open)}
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            {APP_NAME}
-          </Typography>
+          <Link
+            href="/"
+            style={{
+              textDecoration: "none",
+              color: "inherit",
+            }}
+          >
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+              {APP_NAME}
+            </Typography>
+          </Link>
         </Toolbar>
       </AppBar>
     </Box>
