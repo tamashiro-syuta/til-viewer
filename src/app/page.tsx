@@ -9,7 +9,7 @@ export default async function Home() {
     <List>
       <Divider />
       {articles.map((article) => (
-        <Link href={`/${article}`}>
+        <Link href={`/${article}`} key={`all-articles-page-${article}`}>
           <ListItem>
             <ListItemText
               primary={article}
