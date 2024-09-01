@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import { APP_NAME } from "@/constants";
-import { Props } from "./app-bar";
+import { Props } from ".";
 
 export default function TopBar({ open, toggleDrawer }: Props) {
   return (
