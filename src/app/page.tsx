@@ -1,12 +1,24 @@
-import Image from "next/image";
-import styles from "./page.module.css";
-import { Button, Container } from "@mui/material";
-import Card from "@/components/card";
+import { Divider, List, ListItem, ListItemText } from "@mui/material";
+import { fetchAllArticles } from "./actions/repository";
+import Link from "@/components/link";
 
-export default function Home() {
+export default async function Home() {
+  const articles = await fetchAllArticles();
+
   return (
-    <Container sx={{ marginTop: 2 }}>
-      <Card />
-    </Container>
+    <List>
+      <Divider />
+      {articles.map((article) => (
+        <Link href={`/${article}`}>
+          <ListItem>
+            <ListItemText
+              primary={article}
+              sx={{ overflowWrap: "break-word" }}
+            />
+          </ListItem>
+          <Divider />
+        </Link>
+      ))}
+    </List>
   );
 }

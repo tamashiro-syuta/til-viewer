@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import TopBar from "./top-bar";
 import Drawer from "./drawer";
-import { fetchGenres } from "@/app/actions/repository";
+import { fetchTopGenres } from "@/app/actions/repository";
 
 export interface Props {
   open: boolean;
@@ -23,7 +23,7 @@ const AppBar = () => {
 
   useEffect(() => {
     const fetch = async () => {
-      const genres = await fetchGenres();
+      const genres = await fetchTopGenres();
       setGenres(genres);
     };
     fetch();

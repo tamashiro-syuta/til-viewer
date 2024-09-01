@@ -1,11 +1,12 @@
 "use server";
 
 const apiToken = process.env.GITHUB_API_ACCESS_TOKEN;
-const BASE_URL = "https://api.github.com/repos/tamashiro-syuta/TIL/contents/";
+const BASE_URL = "https://api.github.com/repos/tamashiro-syuta/TIL";
 const excludeNames = ["README.md", "image"];
 
-export async function fetchGenres() {
-  const res = await fetch(BASE_URL, {
+export async function fetchTopGenres() {
+  const url = `${BASE_URL}/contents/`;
+  const res = await fetch(url, {
     headers: {
       Accept: "application/vnd.github+json",
       Authorization: `Bearer ${apiToken}`,
@@ -22,6 +23,27 @@ export async function fetchGenres() {
   return genres;
 }
 
+export async function fetchAllArticles() {
+  const sha1 = await fetchTreeSha1();
+  const url = `${BASE_URL}/git/trees/${sha1}?recursive=1`;
+  const res = await fetch(url, {
+    headers: {
+      Accept: "application/vnd.github+json",
+      Authorization: `Bearer ${apiToken}`,
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+  }).then((res) => {
+    return res.json();
+  });
+
+  const articles = res.tree
+    .filter((item: any) => item.path.endsWith(".md") && item.type === "blob")
+    .filter((item: any) => !excludeNames.includes(item.path))
+    .map((item: any) => item.path) as string[];
+
+  return articles;
+}
+
 interface fetchSingleArticleProps {
   paths: string[];
 }
@@ -35,7 +57,7 @@ type fetchSingleArticleResponse = {
 export async function fetchSingleArticle({
   paths,
 }: fetchSingleArticleProps): Promise<fetchSingleArticleResponse> {
-  const url = `${BASE_URL}${paths.join("/")}`;
+  const url = `${BASE_URL}/contents/${paths.join("/")}`;
   const res = await fetch(url, {
     headers: {
       Accept: "application/vnd.github+json",
@@ -59,4 +81,20 @@ export async function fetchSingleArticle({
     content: decodedContent,
     status: 200,
   };
+}
+
+// NOTE: private関数
+async function fetchTreeSha1() {
+  const url = `${BASE_URL}/branches/main`;
+  const res = await fetch(url, {
+    headers: {
+      Accept: "application/vnd.github+json",
+      Authorization: `Bearer ${apiToken}`,
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+  }).then((res) => {
+    return res.json();
+  });
+
+  return res.commit.sha;
 }
