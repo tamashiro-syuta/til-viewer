@@ -1,5 +1,3 @@
-"use server";
-
 const apiToken = process.env.GITHUB_API_ACCESS_TOKEN;
 const BASE_URL = "https://api.github.com/repos/tamashiro-syuta/TIL";
 const excludeNames = ["README.md", "image"];
@@ -12,7 +10,7 @@ export async function fetchTopGenres() {
       Authorization: `Bearer ${apiToken}`,
       "X-GitHub-Api-Version": "2022-11-28",
     },
-    cache: "no-store",
+    next: { revalidate: false },
   }).then((res) => {
     return res.json();
   });
@@ -33,7 +31,7 @@ export async function fetchAllArticles() {
       Authorization: `Bearer ${apiToken}`,
       "X-GitHub-Api-Version": "2022-11-28",
     },
-    cache: "no-store",
+    next: { revalidate: false },
   }).then((res) => {
     return res.json();
   });
@@ -66,7 +64,7 @@ export async function fetchSingleArticle({
       Authorization: `Bearer ${apiToken}`,
       "X-GitHub-Api-Version": "2022-11-28",
     },
-    cache: "no-store",
+    next: { revalidate: false },
   }).then((res) => {
     return res.json();
   });
@@ -95,7 +93,7 @@ async function fetchTreeSha1() {
       Authorization: `Bearer ${apiToken}`,
       "X-GitHub-Api-Version": "2022-11-28",
     },
-    cache: "no-store",
+    next: { revalidate: false },
   }).then((res) => {
     return res.json();
   });

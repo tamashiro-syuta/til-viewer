@@ -1,11 +1,9 @@
 import { Divider, List, ListItem, ListItemText } from "@mui/material";
-import { fetchAllArticles } from "./actions/repository";
 import Link from "@/components/link";
+import { fetchAllArticles } from "@/lib/repository";
 
 export default async function Home() {
   const articles = await fetchAllArticles();
-
-  console.log(articles);
 
   return (
     <List>

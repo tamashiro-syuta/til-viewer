@@ -1,9 +1,9 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import TopBar from "./top-bar";
 import Drawer from "./drawer";
-import { fetchTopGenres } from "@/app/actions/repository";
+import { fetchTopGenres } from "@/lib/repository";
 
 export interface Props {
   open: boolean;

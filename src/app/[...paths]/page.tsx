@@ -1,8 +1,17 @@
 import markdownToHtml from "zenn-markdown-html";
 import "zenn-content-css";
-import { fetchSingleArticle } from "../actions/repository";
 import { Container } from "@mui/material";
 import { notFound } from "next/navigation";
+import { fetchAllArticles, fetchSingleArticle } from "@/lib/repository";
+
+export const generateStaticParams = async () => {
+  const articles = await fetchAllArticles();
+  const arrays = articles.map((article) => article.split("/"));
+
+  return arrays.map((paths) => ({
+    paths,
+  }));
+};
 
 export default async function Page({
   params,
