@@ -34,26 +34,15 @@ export default async function Page({
   });
 
   return (
-    <div>
-      <div style={{ marginTop: "12px", marginBottom: "12px" }}>
-        {title && (
-          <h3
-            style={{
-              marginTop: "20px",
-              marginBottom: "10px",
-              // fontSize: { xs: "25px", sm: "30px", md: "35px", lg: "40px" },
-              fontWeight: "bold",
-            }}
-          >
-            {title}
-          </h3>
-        )}
+    <div className="pt-4">
+      <div className="md:mb-12 text-center md:py-12 py-2 pt-5 bg-primary/20 px-0border border-gray-200 rounded-md">
+        {title && <h1 className="text-2xl font-bold md:pb-6 pb-4">{title}</h1>}
 
         {tags && tags.map((tag) => <Chip key={tag} label={tag} />)}
       </div>
 
       <div
-        className="znc"
+        className="znc md:border md:border-gray-200 md:rounded-md md:p-6 pt-6"
         dangerouslySetInnerHTML={{
           __html: html,
         }}
