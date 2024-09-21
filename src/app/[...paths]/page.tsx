@@ -1,6 +1,5 @@
 import markdownToHtml from "zenn-markdown-html";
 import "zenn-content-css";
-import { Box, Container, Typography } from "@mui/material";
 import { notFound } from "next/navigation";
 import matter from "gray-matter";
 import { fetchAllArticles, fetchSingleArticle } from "@/lib/repository";
@@ -35,24 +34,23 @@ export default async function Page({
   });
 
   return (
-    <Container>
-      <Box sx={{ marginY: "12px" }}>
+    <div>
+      <div style={{ marginTop: "12px", marginBottom: "12px" }}>
         {title && (
-          <Typography
-            variant="h3"
-            sx={{
+          <h3
+            style={{
               marginTop: "20px",
               marginBottom: "10px",
-              fontSize: { xs: "25px", sm: "30px", md: "35px", lg: "40px" },
+              // fontSize: { xs: "25px", sm: "30px", md: "35px", lg: "40px" },
               fontWeight: "bold",
             }}
           >
             {title}
-          </Typography>
+          </h3>
         )}
 
         {tags && tags.map((tag) => <Chip key={tag} label={tag} />)}
-      </Box>
+      </div>
 
       <div
         className="znc"
@@ -60,6 +58,6 @@ export default async function Page({
           __html: html,
         }}
       />
-    </Container>
+    </div>
   );
 }

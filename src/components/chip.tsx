@@ -1,13 +1,10 @@
-import { Box, Typography } from "@mui/material";
-import { grey } from "@mui/material/colors";
-
 interface Props {
   label: string;
 }
 
 const Chip = ({ label }: Props) => {
   return (
-    <Box
+    <div
       className="chip"
       style={{
         display: "inline-flex",
@@ -17,7 +14,7 @@ const Chip = ({ label }: Props) => {
         height: "32px",
         minWidth: "32px",
         fontSize: "12px",
-        backgroundColor: grey[300],
+        backgroundColor: "grey",
         borderRadius: "16px",
         cursor: "default",
       }}
@@ -28,11 +25,9 @@ const Chip = ({ label }: Props) => {
           padding: "0 4px",
         }}
       >
-        <Typography variant="body2" textAlign={"center"} color="textPrimary">
-          {label}
-        </Typography>
+        <p style={{ textAlign: "center", color: "white" }}>{label}</p>
       </div>
-    </Box>
+    </div>
   );
 };
 

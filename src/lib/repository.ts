@@ -46,13 +46,14 @@ export async function fetchAllArticles() {
   return articles;
 }
 
-interface FetchAllArticlesWithFrontMatterReturn {
+export interface ArticlePathWithFrontMatter extends Partial<FrontMatter> {
   path: string;
-  frontMatter: FrontMatter | null;
 }
 
 // NOTE: パス、フロントマターのみを返す
-export async function fetchAllArticlesWithFrontMatter() {
+export async function fetchAllArticlesWithFrontMatter(): Promise<
+  ArticlePathWithFrontMatter[]
+> {
   const sha1 = await fetchTreeSha1();
   const url = `${BASE_URL}/git/trees/${sha1}?recursive=1`;
   const res = await fetch(url, {
@@ -79,7 +80,7 @@ export async function fetchAllArticlesWithFrontMatter() {
 
       return {
         path,
-        frontMatter,
+        ...frontMatter,
       };
     })
   );
