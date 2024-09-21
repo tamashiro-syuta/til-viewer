@@ -66,7 +66,7 @@ export default function Table() {
 
   return (
     <div className="w-full">
-      <div className="flex items-center py-4 pl-2">
+      <div className="flex items-center py-4">
         <Input
           placeholder="Filter title..."
           value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}

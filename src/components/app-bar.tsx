@@ -1,6 +1,6 @@
 const AppBar = () => {
   return (
-    <nav className="bg-primary border-gray-200 dark:bg-gray-900">
+    <nav className="bg-primary border-gray-200">
       <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
         <a
           href="https://flowbite.com/"
