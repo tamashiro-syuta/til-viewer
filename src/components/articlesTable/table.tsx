@@ -33,8 +33,6 @@ export default function Table() {
     queryFn: () => fetchAllArticlesWithFrontMatter(),
   });
 
-  if (data === undefined) return;
-
   const router = useRouter();
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -48,7 +46,7 @@ export default function Table() {
   const [rowSelection, setRowSelection] = React.useState({});
 
   const table = useReactTable({
-    data,
+    data: data ?? [],
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
