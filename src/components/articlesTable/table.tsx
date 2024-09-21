@@ -68,7 +68,7 @@ export default function Table() {
     <div className="w-full">
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filter title..."
+          placeholder="タイトルで検索"
           value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn("title")?.setFilterValue(event.target.value)
@@ -147,7 +147,7 @@ export default function Table() {
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
-            Previous
+            前のページ
           </Button>
           <Button
             variant="outline"
@@ -155,7 +155,7 @@ export default function Table() {
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
-            Next
+            次のページ
           </Button>
         </div>
       </div>
