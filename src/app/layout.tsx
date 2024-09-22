@@ -20,10 +20,12 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body className={`${inter.className} bg-secondary/50`}>
-        <AppBar />
-        <div className="container mx-auto sm:px-4 px-2 bg-white min-h-screen">
-          <Providers>{children}</Providers>
-        </div>
+        <Providers>
+          <AppBar />
+          <div className="container mx-auto sm:px-4 px-2 bg-white min-h-screen">
+            {children}
+          </div>
+        </Providers>
       </body>
     </html>
   );
