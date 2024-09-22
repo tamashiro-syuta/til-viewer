@@ -1,12 +1,14 @@
+import Link from "next/link";
+
 const AppBar = () => {
   return (
     <nav className="bg-primary border-gray-200">
       <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-        <a href="/" className="flex items-center space-x-3 rtl:space-x-reverse">
+        <Link href={"/"}>
           <span className="self-center text-2xl font-semibold whitespace-nowrap text-white">
             TIL-Viewer
           </span>
-        </a>
+        </Link>
         <button
           data-collapse-toggle="navbar-default"
           type="button"
@@ -31,7 +33,7 @@ const AppBar = () => {
             />
           </svg>
         </button>
-        <div className="hidden w-full md:block md:w-auto" id="navbar-default">
+        {/* <div className="hidden w-full md:block md:w-auto" id="navbar-default">
           <ul className="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-primary md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:primary dark:bg-primary md:dark:bg-primary dark:border-gray-700">
             <li>
               <a
@@ -43,7 +45,7 @@ const AppBar = () => {
               </a>
             </li>
           </ul>
-        </div>
+        </div> */}
       </div>
     </nav>
   );
