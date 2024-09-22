@@ -4,9 +4,6 @@ import { fetchLastYearsCommitCountByDate } from "@/lib/repository";
 
 export default async function Home() {
   const commitsCountByDate = await fetchLastYearsCommitCountByDate();
-
-  console.log("commitsCountByDate", commitsCountByDate);
-
   const commitsCountAndDate = Object.keys(commitsCountByDate).map((date) => {
     return {
       date: new Date(date),
