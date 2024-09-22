@@ -10,7 +10,7 @@ export default async function ArticlesTable() {
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery({
-    queryKey: ["dummy"],
+    queryKey: ["articles"],
     queryFn: fetchAllArticlesWithFrontMatter,
   });
 

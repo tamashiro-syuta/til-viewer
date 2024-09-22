@@ -29,7 +29,7 @@ import { useQuery } from "@tanstack/react-query";
 
 export default function Table() {
   const { data } = useQuery({
-    queryKey: ["dummy"],
+    queryKey: ["articles"],
     queryFn: () => fetchAllArticlesWithFrontMatter(),
   });
 
