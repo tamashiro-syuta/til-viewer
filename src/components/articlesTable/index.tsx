@@ -7,11 +7,13 @@ import { fetchAllArticlesWithFrontMatter } from "@/lib/repository";
 import Table from "./table";
 
 export default async function ArticlesTable() {
+  const articles = await fetchAllArticlesWithFrontMatter();
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery({
     queryKey: ["articles"],
     queryFn: fetchAllArticlesWithFrontMatter,
+    initialData: articles,
   });
 
   return (
