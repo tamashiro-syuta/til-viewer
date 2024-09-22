@@ -1,8 +1,13 @@
 import matter from "gray-matter";
+import { Octokit } from "@octokit/rest";
 
 const apiToken = process.env.GITHUB_API_ACCESS_TOKEN;
 const BASE_URL = "https://api.github.com/repos/tamashiro-syuta/TIL";
 const excludeNames = ["README.md", "image"];
+
+const octokit = new Octokit({
+  auth: apiToken,
+});
 
 export async function fetchTopGenres() {
   const url = `${BASE_URL}/contents/`;
@@ -150,6 +155,42 @@ export async function fetchSingleArticleFrontMatter({
     title,
     tags,
   } as FrontMatter;
+}
+
+export async function fetchCommitCountByDate() {
+  // 2ヶ月前の1日から、今日までの正確な日数を取得
+  const today: Date = new Date();
+  const firstDayOfTwoMonthsAgo: Date = new Date(
+    today.getFullYear(),
+    today.getMonth() - 2,
+    1
+  );
+  const timeDifference: number =
+    today.getTime() - firstDayOfTwoMonthsAgo.getTime();
+  const dayCount: number = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+
+  try {
+    // 最新の1件のコミットを取得
+    const { data } = await octokit.repos.listCommits({
+      owner: "tamashiro-syuta",
+      repo: "TIL",
+      per_page: dayCount,
+    });
+    const commitsCountByDate: { [key: string]: number } = {};
+    data.map((commit) => {
+      if (!commit.commit.author?.date) return;
+
+      const date = new Date(commit.commit.author.date).toLocaleDateString();
+      commitsCountByDate[date] = commitsCountByDate[date]
+        ? commitsCountByDate[date] + 1
+        : 1;
+    });
+
+    return commitsCountByDate;
+  } catch (error) {
+    console.error("エラーが発生しました:", error);
+    throw error;
+  }
 }
 
 // NOTE: private関数

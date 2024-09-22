@@ -1,0 +1,26 @@
+.custom-calendar-wrapper {
+  display: flex;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important; /* これで強制的に横並びにする */
+  justify-content: center;
+}
+
+.custom-calendar-month {
+  width: 100%;
+  margin-left: 0 !important; /* !ml-0 */
+  display: flex;             /* flex */
+  flex-wrap: nowrap;          /* flex-nowrap */
+  margin-top: 0;              /* space-y-0 */
+  margin-bottom: 0;           /* space-y-0 */
+}
+
+.root > div {
+  display: flex; /* flex */
+  flex-direction: row; /* sm:flex-row */
+  margin-top: 0px; /* sm:space-y-0: 縦方向の隙間を0に */
+  margin-left: 1rem; /* sm:space-x-4: 横方向に16pxの隙間 */
+}
+
+.root > div > div:not(:first-child) {
+  margin: 0 !important;
+}

@@ -1,10 +1,23 @@
+// import ArticlesTable from "@/components/articlesTable";
+// import { fetchAllArticlesWithFrontMatter } from "@/lib/repository";
+
 import ArticlesTable from "@/components/articlesTable";
-import { fetchAllArticlesWithFrontMatter } from "@/lib/repository";
+import CalendarHeatmap from "@/components/calendar-heatmap";
+import { fetchCommitCountByDate } from "@/lib/repository";
 
 export default async function Home() {
-  const articlesWithFrontMatter = await fetchAllArticlesWithFrontMatter();
+  const commitsCountByDate = await fetchCommitCountByDate();
+  const commitsCountAndDate = Object.keys(commitsCountByDate).map((date) => {
+    return {
+      date: new Date(date),
+      count: commitsCountByDate[date],
+    };
+  });
 
-  console.log(articlesWithFrontMatter);
-
-  return <ArticlesTable />;
+  return (
+    <>
+      <CalendarHeatmap commitsCountAndDate={commitsCountAndDate} />
+      <ArticlesTable />
+    </>
+  );
 }
