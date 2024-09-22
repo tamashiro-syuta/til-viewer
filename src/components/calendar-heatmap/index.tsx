@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { buttonVariants } from "../ui/button";
 import { CustomRow } from "./row";
 import { ja } from "date-fns/locale";
+import { isMobile } from "react-device-detect";
 import "./styles.css";
 
 interface CommitCountAndDate {
@@ -42,22 +43,46 @@ const CalendarHeatmap = async ({ commitsCountAndDate }: Props) => {
     extreme: getDatesByCommitLank(isCommitExtreme),
   };
 
+  const commonStyle = "text-white hover:text-white";
+  const committedCommonStyle = "transition hover:duration-300 hover:scale-110";
   const modifiersClassNames = {
-    none: "bg-green-50 text-white",
-    low: "bg-green-300 text-white",
-    middle: "bg-green-500 text-white",
-    high: "bg-green-700 text-white",
-    extreme: "bg-green-900 text-white",
+    none: cn(commonStyle, "bg-green-50 hover:bg-green-50"),
+    low: cn(
+      commonStyle,
+      committedCommonStyle,
+      "bg-green-300 hover:bg-green-300"
+    ),
+    middle: cn(
+      commonStyle,
+      committedCommonStyle,
+      "bg-green-500 hover:bg-green-500"
+    ),
+    high: cn(
+      commonStyle,
+      committedCommonStyle,
+      "bg-green-700 hover:bg-green-700"
+    ),
+    extreme: cn(
+      commonStyle,
+      committedCommonStyle,
+      "bg-green-900 hover:bg-green-900"
+    ),
   };
 
+  const visibleMonths = 6;
   const today = new Date();
-  const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 1);
+  const monthsAgo = new Date(
+    today.getFullYear(),
+    today.getMonth() - visibleMonths,
+    1
+  );
 
   return (
     <div className="flex justify-center overflow-x-auto">
       <Calendar
-        numberOfMonths={3}
-        defaultMonth={twoMonthsAgo}
+        // NOTE: なんか1足したら見た目いい感じなったから足してるよ
+        numberOfMonths={visibleMonths + 1}
+        defaultMonth={monthsAgo}
         locale={ja}
         formatters={{
           formatCaption: (d) => {

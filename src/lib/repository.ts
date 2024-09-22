@@ -157,34 +157,43 @@ export async function fetchSingleArticleFrontMatter({
   } as FrontMatter;
 }
 
-export async function fetchCommitCountByDate() {
+export async function fetchLastYearsCommitCountByDate() {
   // 2ヶ月前の1日から、今日までの正確な日数を取得
   const today: Date = new Date();
-  const firstDayOfTwoMonthsAgo: Date = new Date(
-    today.getFullYear(),
-    today.getMonth() - 2,
-    1
+  const OneYearAgoDate: Date = new Date(
+    today.getFullYear() - 1,
+    today.getMonth(),
+    today.getDate()
   );
-  const timeDifference: number =
-    today.getTime() - firstDayOfTwoMonthsAgo.getTime();
-  const dayCount: number = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
 
   try {
-    // 最新の1件のコミットを取得
-    const { data } = await octokit.repos.listCommits({
-      owner: "tamashiro-syuta",
-      repo: "TIL",
-      per_page: dayCount,
-    });
+    let page = 1;
+    let hasMore = true;
+    const per_page = 100;
     const commitsCountByDate: { [key: string]: number } = {};
-    data.map((commit) => {
-      if (!commit.commit.author?.date) return;
 
-      const date = new Date(commit.commit.author.date).toLocaleDateString();
-      commitsCountByDate[date] = commitsCountByDate[date]
-        ? commitsCountByDate[date] + 1
-        : 1;
-    });
+    while (hasMore) {
+      const { data } = await octokit.repos.listCommits({
+        owner: "tamashiro-syuta",
+        repo: "TIL",
+        per_page, // NOTE: 1ページあたり100件取得
+        page, // NOTE: ページ番号を指定
+        since: OneYearAgoDate.toISOString(),
+      });
+
+      // データを全体の配列に追加
+      data.map((commit) => {
+        if (!commit.commit.author?.date) return;
+
+        const date = new Date(commit.commit.author.date).toLocaleDateString();
+        commitsCountByDate[date] = commitsCountByDate[date]
+          ? commitsCountByDate[date] + 1
+          : 1;
+      });
+
+      // NOTE: 次のページが存在すれば、ページ数をインクリメント、存在しなければ終了
+      data.length < per_page ? (hasMore = false) : page++;
+    }
 
     return commitsCountByDate;
   } catch (error) {

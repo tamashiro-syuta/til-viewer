@@ -1,12 +1,12 @@
-// import ArticlesTable from "@/components/articlesTable";
-// import { fetchAllArticlesWithFrontMatter } from "@/lib/repository";
-
 import ArticlesTable from "@/components/articlesTable";
 import CalendarHeatmap from "@/components/calendar-heatmap";
-import { fetchCommitCountByDate } from "@/lib/repository";
+import { fetchLastYearsCommitCountByDate } from "@/lib/repository";
 
 export default async function Home() {
-  const commitsCountByDate = await fetchCommitCountByDate();
+  const commitsCountByDate = await fetchLastYearsCommitCountByDate();
+
+  console.log("commitsCountByDate", commitsCountByDate);
+
   const commitsCountAndDate = Object.keys(commitsCountByDate).map((date) => {
     return {
       date: new Date(date),
