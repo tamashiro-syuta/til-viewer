@@ -10,45 +10,55 @@ const octokit = new Octokit({
 });
 
 export async function fetchTopGenres() {
-  const url = `${BASE_URL}/contents/`;
-  const res = await fetch(url, {
-    headers: {
-      Accept: "application/vnd.github+json",
-      Authorization: `Bearer ${apiToken}`,
-      "X-GitHub-Api-Version": "2022-11-28",
-    },
-    next: { revalidate: false },
-  }).then((res) => {
-    return res.json();
-  });
+  try {
+    const url = `${BASE_URL}/contents/`;
+    const res = await fetch(url, {
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${apiToken}`,
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+      next: { revalidate: false },
+    }).then((res) => {
+      return res.json();
+    });
 
-  const genres = res
-    .filter((item: any) => !excludeNames.includes(item.name))
-    .map((item: any) => item.name) as string[];
+    const genres = res
+      .filter((item: any) => !excludeNames.includes(item.name))
+      .map((item: any) => item.name) as string[];
 
-  return genres;
+    return genres;
+  } catch (error) {
+    console.error("エラーが発生しました:", error);
+    throw error;
+  }
 }
 
 export async function fetchAllArticles() {
-  const sha1 = await fetchTreeSha1();
-  const url = `${BASE_URL}/git/trees/${sha1}?recursive=1`;
-  const res = await fetch(url, {
-    headers: {
-      Accept: "application/vnd.github+json",
-      Authorization: `Bearer ${apiToken}`,
-      "X-GitHub-Api-Version": "2022-11-28",
-    },
-    next: { revalidate: false },
-  }).then((res) => {
-    return res.json();
-  });
+  try {
+    const sha1 = await fetchTreeSha1();
+    const url = `${BASE_URL}/git/trees/${sha1}?recursive=1`;
+    const res = await fetch(url, {
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${apiToken}`,
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+      next: { revalidate: false },
+    }).then((res) => {
+      return res.json();
+    });
 
-  const articles = res.tree
-    .filter((item: any) => item.path.endsWith(".md") && item.type === "blob")
-    .filter((item: any) => !excludeNames.includes(item.path))
-    .map((item: any) => item.path) as string[];
+    const articles = res.tree
+      .filter((item: any) => item.path.endsWith(".md") && item.type === "blob")
+      .filter((item: any) => !excludeNames.includes(item.path))
+      .map((item: any) => item.path) as string[];
 
-  return articles;
+    return articles;
+  } catch (error) {
+    console.error("エラーが発生しました:", error);
+    throw error;
+  }
 }
 
 export interface ArticlePathWithFrontMatter extends Partial<FrontMatter> {
@@ -59,38 +69,43 @@ export interface ArticlePathWithFrontMatter extends Partial<FrontMatter> {
 export async function fetchAllArticlesWithFrontMatter(): Promise<
   ArticlePathWithFrontMatter[]
 > {
-  const sha1 = await fetchTreeSha1();
-  const url = `${BASE_URL}/git/trees/${sha1}?recursive=1`;
-  const res = await fetch(url, {
-    headers: {
-      Accept: "application/vnd.github+json",
-      Authorization: `Bearer ${apiToken}`,
-      "X-GitHub-Api-Version": "2022-11-28",
-    },
-    next: { revalidate: false },
-  }).then((res) => {
-    return res.json();
-  });
+  try {
+    const sha1 = await fetchTreeSha1();
+    const url = `${BASE_URL}/git/trees/${sha1}?recursive=1`;
+    const res = await fetch(url, {
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${apiToken}`,
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+      next: { revalidate: false },
+    }).then((res) => {
+      return res.json();
+    });
 
-  const paths = res.tree
-    .filter((item: any) => item.path.endsWith(".md") && item.type === "blob")
-    .filter((item: any) => !excludeNames.includes(item.path))
-    .map((item: any) => item.path) as string[];
+    const paths = res.tree
+      .filter((item: any) => item.path.endsWith(".md") && item.type === "blob")
+      .filter((item: any) => !excludeNames.includes(item.path))
+      .map((item: any) => item.path) as string[];
 
-  const PathAndFrontMatters = await Promise.all(
-    paths.map(async (path) => {
-      const frontMatter = await fetchSingleArticleFrontMatter({
-        paths: path.split("/"),
-      });
+    const PathAndFrontMatters = await Promise.all(
+      paths.map(async (path) => {
+        const frontMatter = await fetchSingleArticleFrontMatter({
+          paths: path.split("/"),
+        });
 
-      return {
-        path,
-        ...frontMatter,
-      };
-    })
-  );
+        return {
+          path,
+          ...frontMatter,
+        };
+      })
+    );
 
-  return PathAndFrontMatters;
+    return PathAndFrontMatters;
+  } catch (error) {
+    console.error("エラーが発生しました:", error);
+    throw error;
+  }
 }
 
 interface fetchSingleArticleProps {
@@ -106,31 +121,36 @@ type fetchSingleArticleResponse = {
 export async function fetchSingleArticle({
   paths,
 }: fetchSingleArticleProps): Promise<fetchSingleArticleResponse> {
-  const url = `${BASE_URL}/contents/${paths.join("/")}`;
-  const res = await fetch(url, {
-    headers: {
-      Accept: "application/vnd.github+json",
-      Authorization: `Bearer ${apiToken}`,
-      "X-GitHub-Api-Version": "2022-11-28",
-    },
-    next: { revalidate: false },
-  }).then((res) => {
-    return res.json();
-  });
+  try {
+    const url = `${BASE_URL}/contents/${paths.join("/")}`;
+    const res = await fetch(url, {
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${apiToken}`,
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+      next: { revalidate: false },
+    }).then((res) => {
+      return res.json();
+    });
 
-  // NOTE: 記事が見つからない場合は、404を返す
-  if (res.status === "404") {
+    // NOTE: 記事が見つからない場合は、404を返す
+    if (res.status === "404") {
+      return {
+        content: "",
+        status: 404,
+      };
+    }
+
+    const decodedContent = Buffer.from(res.content, "base64").toString();
     return {
-      content: "",
-      status: 404,
+      content: decodedContent,
+      status: 200,
     };
+  } catch (error) {
+    console.error("エラーが発生しました:", error);
+    throw error;
   }
-
-  const decodedContent = Buffer.from(res.content, "base64").toString();
-  return {
-    content: decodedContent,
-    status: 200,
-  };
 }
 
 interface FrontMatter {
@@ -141,20 +161,25 @@ interface FrontMatter {
 export async function fetchSingleArticleFrontMatter({
   paths,
 }: fetchSingleArticleProps): Promise<FrontMatter | null> {
-  const { content, status } = await fetchSingleArticle({ paths });
+  try {
+    const { content, status } = await fetchSingleArticle({ paths });
 
-  if (status === 404) {
-    return null;
+    if (status === 404) {
+      return null;
+    }
+
+    const matteredContent = matter(content, {});
+    const title: string = matteredContent?.data?.title || "";
+    const tags: string[] = matteredContent?.data?.tags || [];
+
+    return {
+      title,
+      tags,
+    } as FrontMatter;
+  } catch (error) {
+    console.error("エラーが発生しました:", error);
+    throw error;
   }
-
-  const matteredContent = matter(content, {});
-  const title: string = matteredContent?.data?.title || "";
-  const tags: string[] = matteredContent?.data?.tags || [];
-
-  return {
-    title,
-    tags,
-  } as FrontMatter;
 }
 
 export async function fetchLastHalfYearsCommitCountByDate() {
@@ -204,17 +229,22 @@ export async function fetchLastHalfYearsCommitCountByDate() {
 
 // NOTE: private関数
 async function fetchTreeSha1() {
-  const url = `${BASE_URL}/branches/main`;
-  const res = await fetch(url, {
-    headers: {
-      Accept: "application/vnd.github+json",
-      Authorization: `Bearer ${apiToken}`,
-      "X-GitHub-Api-Version": "2022-11-28",
-    },
-    next: { revalidate: false },
-  }).then((res) => {
-    return res.json();
-  });
+  try {
+    const url = `${BASE_URL}/branches/main`;
+    const res = await fetch(url, {
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${apiToken}`,
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+      next: { revalidate: false },
+    }).then((res) => {
+      return res.json();
+    });
 
-  return res.commit.sha;
+    return res.commit.sha;
+  } catch (error) {
+    console.error("エラーが発生しました:", error);
+    throw error;
+  }
 }
