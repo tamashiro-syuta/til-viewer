@@ -157,12 +157,12 @@ export async function fetchSingleArticleFrontMatter({
   } as FrontMatter;
 }
 
-export async function fetchLastYearsCommitCountByDate() {
+export async function fetchLastHalfYearsCommitCountByDate() {
   // 2ヶ月前の1日から、今日までの正確な日数を取得
   const today: Date = new Date();
   const OneYearAgoDate: Date = new Date(
-    today.getFullYear() - 1,
-    today.getMonth(),
+    today.getFullYear(),
+    today.getMonth() - 6,
     today.getDate()
   );
 
