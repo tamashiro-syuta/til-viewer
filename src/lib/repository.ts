@@ -3,7 +3,7 @@ import { Octokit } from "@octokit/rest";
 
 const apiToken = process.env.GITHUB_API_ACCESS_TOKEN;
 const BASE_URL = "https://api.github.com/repos/tamashiro-syuta/TIL";
-const excludeNames = ["README.md", "image"];
+const excludeNames = ["README.md", "image", "create_md.sh"];
 
 const octokit = new Octokit({
   auth: apiToken,
