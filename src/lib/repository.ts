@@ -1,5 +1,6 @@
 import matter from "gray-matter";
 import { Octokit } from "@octokit/rest";
+import { mockArticles, mockPathAndFrontMatters } from "./mock-repository";
 
 const apiToken = process.env.GITHUB_API_ACCESS_TOKEN;
 const BASE_URL = "https://api.github.com/repos/tamashiro-syuta/TIL";
@@ -9,32 +10,9 @@ const octokit = new Octokit({
   auth: apiToken,
 });
 
-export async function fetchTopGenres() {
-  try {
-    const url = `${BASE_URL}/contents/`;
-    const res = await fetch(url, {
-      headers: {
-        Accept: "application/vnd.github+json",
-        Authorization: `Bearer ${apiToken}`,
-        "X-GitHub-Api-Version": "2022-11-28",
-      },
-      next: { revalidate: false },
-    }).then((res) => {
-      return res.json();
-    });
-
-    const genres = res
-      .filter((item: any) => !excludeNames.includes(item.name))
-      .map((item: any) => item.name) as string[];
-
-    return genres;
-  } catch (error) {
-    console.error("エラーが発生しました:", error);
-    throw error;
-  }
-}
-
 export async function fetchAllArticles() {
+  if (process.env.NODE_ENV === "development") return mockArticles;
+
   try {
     const sha1 = await fetchTreeSha1();
     const url = `${BASE_URL}/git/trees/${sha1}?recursive=1`;
@@ -54,6 +32,7 @@ export async function fetchAllArticles() {
       .filter((item: any) => !excludeNames.includes(item.path))
       .map((item: any) => item.path) as string[];
 
+    console.log("articles", articles);
     return articles;
   } catch (error) {
     console.error("エラーが発生しました:", error);
@@ -69,6 +48,8 @@ export interface ArticlePathWithFrontMatter extends Partial<FrontMatter> {
 export async function fetchAllArticlesWithFrontMatter(): Promise<
   ArticlePathWithFrontMatter[]
 > {
+  if (process.env.NODE_ENV === "development") return mockPathAndFrontMatters;
+
   try {
     const sha1 = await fetchTreeSha1();
     const url = `${BASE_URL}/git/trees/${sha1}?recursive=1`;
