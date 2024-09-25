@@ -11,14 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: oven-sh/setup-bun@v2
         with:
-          node-version: 21.x
-      - name: Recreate all posts
-        shell: bash
-        run: |
-          npm install
-          npm run build
+          bun-version: 1.0.25
+      - run: bun run build
       - uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
