@@ -7,19 +7,20 @@ on:
     branches:
       - main
 jobs:
-  Deploy-Production:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.0.25
-      - run: bun run build
+      - name: build
+        run: bun run build
       - uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID}}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID}}
-          vercel-args: '--prod' # Optional
+          vercel-args: '--prod'
           vercel-version: latest
           working-directory: ./
