@@ -14,6 +14,11 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.0.25
+      - name: setup env file
+        # NOTE: GITHUB_で始める環境変数は予約語らしいので、GH_で始めている
+        run : |
+          touch .env
+          echo "GITHUB_API_ACCESS_TOKEN=${{ secrets.GH_API_ACCESS_TOKEN }}" >> .env
       - name: install
         run: bun install
       - name: build
