@@ -67,6 +67,14 @@ export default function Table() {
     },
   });
 
+  React.useEffect(() => {
+    setColumnVisibility({
+      ...columnVisibility,
+      date: self.innerWidth > 768,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="w-full">
       <div className="flex items-center py-4">
