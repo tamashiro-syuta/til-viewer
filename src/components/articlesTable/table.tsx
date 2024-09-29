@@ -23,18 +23,24 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { columns } from "./columns";
-import { fetchAllArticlesWithFrontMatter } from "@/lib/repository";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import { getAllArticlesSortByCommittedAt } from "@/lib/repository";
 
 export default function Table() {
   const { data } = useQuery({
     queryKey: ["articles"],
-    queryFn: () => fetchAllArticlesWithFrontMatter(),
+    queryFn: () => getAllArticlesSortByCommittedAt(),
   });
 
   const router = useRouter();
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [sorting, setSorting] = React.useState<SortingState>([
+    // NOTE: デフォルトで更新日順にソート
+    {
+      id: "date",
+      desc: true,
+    },
+  ]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );

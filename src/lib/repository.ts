@@ -1,6 +1,9 @@
 import matter from "gray-matter";
 import { Octokit } from "@octokit/rest";
-import { mockArticles, mockPathAndFrontMatters } from "./mock-repository";
+import {
+  mockArticles,
+  mockPathAndDateWithFrontMatters,
+} from "./mock-repository";
 
 const apiToken = process.env.GITHUB_API_ACCESS_TOKEN;
 const BASE_URL = "https://api.github.com/repos/tamashiro-syuta/TIL";
@@ -32,7 +35,6 @@ export async function fetchAllArticles() {
       .filter((item: any) => !excludeNames.includes(item.path))
       .map((item: any) => item.path) as string[];
 
-    console.log("articles", articles);
     return articles;
   } catch (error) {
     console.error("エラーが発生しました:", error);
@@ -40,52 +42,93 @@ export async function fetchAllArticles() {
   }
 }
 
-export interface ArticlePathWithFrontMatter extends Partial<FrontMatter> {
-  path: string;
-}
-
-// NOTE: パス、フロントマターのみを返す
-export async function fetchAllArticlesWithFrontMatter(): Promise<
-  ArticlePathWithFrontMatter[]
-> {
-  if (process.env.NODE_ENV === "development") return mockPathAndFrontMatters;
-
+// 指定ディレクトリのファイルツリーを取得
+async function getRepoTree() {
   try {
-    const sha1 = await fetchTreeSha1();
-    const url = `${BASE_URL}/git/trees/${sha1}?recursive=1`;
-    const res = await fetch(url, {
-      headers: {
-        Accept: "application/vnd.github+json",
-        Authorization: `Bearer ${apiToken}`,
-        "X-GitHub-Api-Version": "2022-11-28",
-      },
-      next: { revalidate: false },
-    }).then((res) => {
-      return res.json();
+    const { data: refData } = await octokit.git.getRef({
+      owner: "tamashiro-syuta",
+      repo: "TIL",
+      ref: `heads/main`,
     });
 
-    const paths = res.tree
-      .filter((item: any) => item.path.endsWith(".md") && item.type === "blob")
-      .filter((item: any) => !excludeNames.includes(item.path))
-      .map((item: any) => item.path) as string[];
+    const { data: treeData } = await octokit.git.getTree({
+      owner: "tamashiro-syuta",
+      repo: "TIL",
+      tree_sha: refData.object.sha,
+      recursive: "true", // 再帰的に全てのファイルを取得
+    });
 
-    const PathAndFrontMatters = await Promise.all(
-      paths.map(async (path) => {
+    return treeData.tree;
+  } catch (error) {
+    console.error("エラーが発生しました:", error);
+  }
+}
+
+export interface ArticlePathAndDateWithFrontMatter
+  extends Partial<FrontMatter> {
+  path: string;
+  date: Date;
+}
+
+export async function getAllArticlesSortByCommittedAt(): Promise<
+  ArticlePathAndDateWithFrontMatter[] | undefined
+> {
+  if (process.env.NODE_ENV === "development")
+    return mockPathAndDateWithFrontMatters;
+
+  try {
+    const repoTree = await getRepoTree();
+
+    // Markdownファイル（.md拡張子）のみをフィルタリング
+    const markdownFiles = repoTree?.filter((file) =>
+      file.path?.endsWith(".md")
+    );
+
+    if (!markdownFiles) return;
+
+    const PathAndDate = await Promise.all(
+      markdownFiles.map(async (file) => {
+        const commits = await octokit.repos.listCommits({
+          owner: "tamashiro-syuta",
+          repo: "TIL",
+          path: file.path,
+          sha: "main",
+          per_page: 1, // 最新のコミットのみ取得
+        });
+
+        if (commits.data.length > 0) {
+          const commitDate = commits.data[0].commit.committer?.date;
+          const commitPath = file.path;
+          if (!commitDate || !commitPath) return;
+
+          return {
+            path: commitPath,
+            date: new Date(commitDate),
+          };
+        }
+      })
+    );
+
+    const filteredPathAndDate = PathAndDate.filter((i) => i !== undefined);
+    const PathAndDateWithFrontMatters = await Promise.all(
+      filteredPathAndDate.map(async ({ path, date }) => {
         const frontMatter = await fetchSingleArticleFrontMatter({
           paths: path.split("/"),
         });
 
         return {
           path,
+          date,
           ...frontMatter,
         };
       })
     );
 
-    return PathAndFrontMatters;
+    return PathAndDateWithFrontMatters.sort(
+      (a, b) => b.date.getTime() - a.date.getTime()
+    );
   } catch (error) {
     console.error("エラーが発生しました:", error);
-    throw error;
   }
 }
 
