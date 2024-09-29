@@ -36,10 +36,7 @@ export default function Table() {
   const router = useRouter();
   const [sorting, setSorting] = React.useState<SortingState>([
     // NOTE: デフォルトで更新日順にソート
-    {
-      id: "date",
-      desc: true,
-    },
+    { id: "date", desc: true },
   ]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
