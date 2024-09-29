@@ -1,3 +1,5 @@
+import { FileCommitCountMap } from "./repository";
+
 export const mockArticles = [
   "ai/tech_selection_tips.md",
   "architecture/klearn_architecture_handson.md",
@@ -305,3 +307,9 @@ export const mockPathAndDateWithFrontMatters = [
     tags: ["TypeScript"],
   },
 ];
+
+export const mockFileCommitCountMap: FileCommitCountMap = {
+  "ai/tech_selection_tips.md": 1,
+  "architecture/klearn_architecture_handson.md": 4,
+  "lang/Golang/ATourOfGo/flow-control-statements.md": 2,
+};

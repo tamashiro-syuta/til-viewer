@@ -2,6 +2,7 @@ import matter from "gray-matter";
 import { Octokit } from "@octokit/rest";
 import {
   mockArticles,
+  mockFileCommitCountMap,
   mockPathAndDateWithFrontMatters,
 } from "./mock-repository";
 
@@ -14,7 +15,11 @@ const octokit = new Octokit({
 });
 
 export async function fetchAllArticles() {
-  if (process.env.NODE_ENV === "development") return mockArticles;
+  if (
+    process.env.NODE_ENV === "development" ||
+    process.env.NODE_ENV === "production" // TODO: 一旦、動作確認でproductionもmockデータを返す
+  )
+    return mockArticles;
 
   try {
     const sha1 = await fetchTreeSha1();
@@ -73,7 +78,10 @@ export interface ArticlePathAndDateWithFrontMatter
 export async function getAllArticlesSortByCommittedAt(): Promise<
   ArticlePathAndDateWithFrontMatter[] | undefined
 > {
-  if (process.env.NODE_ENV === "development")
+  if (
+    process.env.NODE_ENV === "development" ||
+    process.env.NODE_ENV === "production" // TODO: 一旦、動作確認でproductionもmockデータを返す
+  )
     return mockPathAndDateWithFrontMatters;
 
   try {
@@ -248,6 +256,72 @@ export async function fetchLastHalfYearsCommitCountByDate() {
   } catch (error) {
     console.error("エラーが発生しました:", error);
     throw error;
+  }
+}
+
+interface Props {
+  date: Date;
+}
+export type FileCommitCountMap = Record<string, number>;
+export async function getCommitsByDate({
+  date,
+}: Props): Promise<FileCommitCountMap | undefined> {
+  if (
+    process.env.NODE_ENV === "development" ||
+    process.env.NODE_ENV === "production" // TODO: 一旦、動作確認でproductionもmockデータを返す
+  )
+    return mockFileCommitCountMap;
+
+  const startDate = new Date(date);
+  startDate.setUTCHours(0, 0, 0, 0);
+  const endDate = new Date(date);
+  endDate.setUTCHours(23, 59, 59, 999);
+
+  try {
+    // 特定の日付のコミットを取得
+    const commits = await octokit.repos.listCommits({
+      owner: "tamashiro-syuta",
+      repo: "TIL",
+      since: startDate.toString(),
+      until: endDate.toString(),
+      sha: "main",
+    });
+
+    // ファイルごとのコミット回数を記録するマップ
+    const fileCommitCountMap: Record<string, number> = {};
+
+    // 各コミットのファイルを調べる
+    for (const commit of commits.data) {
+      // コミット内の変更されたファイルリストを取得
+      const { data: commitData } = await octokit.repos.getCommit({
+        owner: "tamashiro-syuta",
+        repo: "TIL",
+        ref: commit.sha,
+      });
+
+      // 各ファイルのパスを調べ、そのコミット回数をカウント
+      for (const file of commitData.files || []) {
+        const filePath = file.filename;
+
+        if (fileCommitCountMap[filePath]) {
+          fileCommitCountMap[filePath] += 1;
+        } else {
+          fileCommitCountMap[filePath] = 1;
+        }
+      }
+    }
+
+    console.log("fileCommitCountMap", fileCommitCountMap);
+
+    // 結果を表示
+    console.log(`日付: ${date} のコミットファイルと回数`);
+    for (const [filePath, commitCount] of Object.entries(fileCommitCountMap)) {
+      console.log(`ファイル: ${filePath}, コミット回数: ${commitCount}`);
+    }
+
+    return fileCommitCountMap;
+  } catch (error) {
+    console.error("エラーが発生しました:", error);
   }
 }
 
