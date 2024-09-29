@@ -84,7 +84,6 @@ export default function Table() {
           onChange={(event) =>
             table.getColumn("title")?.setFilterValue(event.target.value)
           }
-          className="max-w-sm"
         />
       </div>
       <div className="rounded-md border">
