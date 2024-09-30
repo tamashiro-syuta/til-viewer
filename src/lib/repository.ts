@@ -15,11 +15,7 @@ const octokit = new Octokit({
 });
 
 export async function fetchAllArticles() {
-  if (
-    process.env.NODE_ENV === "development" ||
-    process.env.NODE_ENV === "production" // TODO: 一旦、動作確認でproductionもmockデータを返す
-  )
-    return mockArticles;
+  if (process.env.NODE_ENV === "development") return mockArticles;
 
   try {
     const sha1 = await fetchTreeSha1();
@@ -78,10 +74,7 @@ export interface ArticlePathAndDateWithFrontMatter
 export async function getAllArticlesSortByCommittedAt(): Promise<
   ArticlePathAndDateWithFrontMatter[] | undefined
 > {
-  if (
-    process.env.NODE_ENV === "development" ||
-    process.env.NODE_ENV === "production" // TODO: 一旦、動作確認でproductionもmockデータを返す
-  )
+  if (process.env.NODE_ENV === "development")
     return mockPathAndDateWithFrontMatters;
 
   try {
@@ -195,10 +188,7 @@ export async function fetchSingleArticleFrontMatter({
 }: fetchSingleArticleProps): Promise<FrontMatter | null> {
   try {
     const { content, status } = await fetchSingleArticle({ paths });
-
-    if (status === 404) {
-      return null;
-    }
+    if (status === 404) return null;
 
     const matteredContent = matter(content, {});
     const title: string = matteredContent?.data?.title || "";
@@ -266,11 +256,7 @@ export type FileCommitCountMap = Record<string, number>;
 export async function getCommitsByDate({
   date,
 }: Props): Promise<FileCommitCountMap | undefined> {
-  if (
-    process.env.NODE_ENV === "development" ||
-    process.env.NODE_ENV === "production" // TODO: 一旦、動作確認でproductionもmockデータを返す
-  )
-    return mockFileCommitCountMap;
+  if (process.env.NODE_ENV === "development") return mockFileCommitCountMap;
 
   const startDate = new Date(date);
   startDate.setUTCHours(0, 0, 0, 0);
@@ -309,14 +295,6 @@ export async function getCommitsByDate({
           fileCommitCountMap[filePath] = 1;
         }
       }
-    }
-
-    console.log("fileCommitCountMap", fileCommitCountMap);
-
-    // 結果を表示
-    console.log(`日付: ${date} のコミットファイルと回数`);
-    for (const [filePath, commitCount] of Object.entries(fileCommitCountMap)) {
-      console.log(`ファイル: ${filePath}, コミット回数: ${commitCount}`);
     }
 
     return fileCommitCountMap;

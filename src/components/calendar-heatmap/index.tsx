@@ -134,10 +134,7 @@ const CalendarHeatmap = ({ commitsCountAndDate }: Props) => {
             Row: (props) => <CustomRow {...props} />,
             Caption: () => <></>,
           }}
-          onDayClick={(date) => {
-            console.log(date);
-            handleDateChange(date);
-          }}
+          onDayClick={(date) => handleDateChange(date)}
         />
       </div>
       <CommitDateDialog
