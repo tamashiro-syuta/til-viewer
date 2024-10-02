@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import matter from "gray-matter";
 import { fetchAllArticles, fetchSingleArticle } from "@/lib/repository";
 import Chip from "@/components/chip";
+import replaceImageSrcInHtml from "@/lib/replaceImageSrcInHtml";
 
 export const generateStaticParams = async () => {
   const articles = await fetchAllArticles();
@@ -33,7 +34,9 @@ export default async function Page({
     embedOrigin: "https://embed.zenn.studio",
   });
 
-  return (
+  const imageReplacedHtml = await replaceImageSrcInHtml(html);
+
+  s3: return (
     <div className="pt-4">
       <div className="md:mb-12 text-center md:py-12 py-2 pt-5 bg-primary/20 px-0border border-gray-200 rounded-md">
         {title && <h1 className="text-2xl font-bold md:pb-6 pb-4">{title}</h1>}
@@ -44,7 +47,7 @@ export default async function Page({
       <div
         className="znc md:border md:border-gray-200 md:rounded-md md:p-6 pt-6"
         dangerouslySetInnerHTML={{
-          __html: html,
+          __html: imageReplacedHtml,
         }}
       />
     </div>
