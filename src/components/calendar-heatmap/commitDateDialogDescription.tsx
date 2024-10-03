@@ -6,8 +6,6 @@ interface Props {
 }
 
 const commitDateDialogDescription = async ({ date }: Props) => {
-  // 1秒待機
-  await new Promise((resolve) => setTimeout(resolve, 1000));
   const fileCommitCountMap = await getCommitsByDate({ date });
 
   if (!fileCommitCountMap) {
