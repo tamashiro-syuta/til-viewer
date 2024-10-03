@@ -3,7 +3,6 @@
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "../ui/button";
-import { CustomRow } from "./row";
 import { ja } from "date-fns/locale";
 import "./styles.css";
 import { useState } from "react";
@@ -131,7 +130,6 @@ const CalendarHeatmap = ({ commitsCountAndDate }: Props) => {
           modifiersClassNames={modifiersClassNames}
           components={{
             Head: () => <></>,
-            Row: (props) => <CustomRow {...props} />,
             Caption: () => <></>,
           }}
           onDayClick={(date) => handleDateChange(date)}
