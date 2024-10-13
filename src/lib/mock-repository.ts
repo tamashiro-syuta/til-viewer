@@ -1,5 +1,3 @@
-import { FileCommitCountMap } from "./repository";
-
 export const mockArticles = [
   "ai/tech_selection_tips.md",
   "architecture/klearn_architecture_handson.md",
@@ -308,7 +306,7 @@ export const mockPathAndDateWithFrontMatters = [
   },
 ];
 
-export const mockFileCommitCountMap: FileCommitCountMap = {
+export const mockFileCommitCountMap: Record<string, number> = {
   "ai/tech_selection_tips.md": 1,
   "architecture/klearn_architecture_handson.md": 4,
   "lang/Golang/ATourOfGo/flow-control-statements.md": 2,
