@@ -32,16 +32,12 @@ const CommitDateDialog = ({ open, setOpen, date, isNotCommit }: Props) => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{`📍${dateToYYYYMMDD(date)} のコミット`}</DialogTitle>
-            <DialogDescription>
-              <Suspense
-                fallback={
-                  <SpinLoading size={"medium"} className="pt-20 pb-16" />
-                }
-              >
-                <CommitDateDialogDescription date={date} />
-              </Suspense>
-            </DialogDescription>
           </DialogHeader>
+          <Suspense
+            fallback={<SpinLoading size={"medium"} className="pt-20 pb-16" />}
+          >
+            <CommitDateDialogDescription date={date} />
+          </Suspense>
         </DialogContent>
       )}
     </Dialog>

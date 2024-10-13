@@ -1,19 +1,16 @@
 "use client";
 
 import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
-import { buttonVariants } from "../ui/button";
+import { cn, formatYYYYMMDDToDate } from "@/lib/utils";
+import { Button, buttonVariants } from "../ui/button";
 import { ja } from "date-fns/locale";
 import "./styles.css";
 import { useState } from "react";
 import CommitDateDialog from "./commitDateDialog";
+import { FileCommits } from "@/actions/file-commits";
 
-interface CommitCountAndDate {
-  date: Date;
-  count: number;
-}
 export interface Props {
-  commitsCountAndDate: CommitCountAndDate[];
+  commitsCountAndDate: FileCommits;
 }
 
 const CalendarHeatmap = ({ commitsCountAndDate }: Props) => {
@@ -39,9 +36,9 @@ const CalendarHeatmap = ({ commitsCountAndDate }: Props) => {
   const getDatesByCommitLank = (
     checkCommitLank: (count: number) => boolean
   ): Date[] => {
-    return commitsCountAndDate
-      .filter((commit) => checkCommitLank(commit.count))
-      .map((commit) => commit.date);
+    return Object.entries(commitsCountAndDate)
+      .filter(([_date, count]) => checkCommitLank(count))
+      .map(([date, _count]) => formatYYYYMMDDToDate(date));
   };
 
   const modifiers = {
@@ -89,11 +86,14 @@ const CalendarHeatmap = ({ commitsCountAndDate }: Props) => {
   const isNotCommit = (date: Date | null): boolean => {
     if (!date) return true;
 
-    const foundObject = commitsCountAndDate.find((item) => {
-      return item.date.toDateString() === date.toDateString();
-    });
+    const foundObject = Object.entries(commitsCountAndDate).find(
+      ([key, _value]) => {
+        return formatYYYYMMDDToDate(key).toDateString() === date.toDateString();
+      }
+    );
 
-    if (!foundObject || foundObject.count === NONE) return true;
+    const COUNT_INDEX = 1;
+    if (!foundObject || foundObject[COUNT_INDEX] === NONE) return true;
     return false;
   };
 
