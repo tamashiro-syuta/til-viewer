@@ -9,17 +9,25 @@ import {
   DialogTitle,
 } from "../ui/dialog";
 import { dateToYYYYMMDD } from "@/lib/utils";
-import CommitDateDialogDescription from "./commitDateDialogDescription";
 import { SpinLoading } from "../loading";
+import { PathAndCount } from "@/usecases/file-commits";
+import Link from "next/link";
 
 interface Props {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
   date: Date | null;
+  fileCommitCounts: PathAndCount[];
   isNotCommit: (date: Date | null) => boolean;
 }
 
-const CommitDateDialog = ({ open, setOpen, date, isNotCommit }: Props) => {
+const CommitDateDialog = ({
+  open,
+  setOpen,
+  date,
+  fileCommitCounts,
+  isNotCommit,
+}: Props) => {
   if (date === null) return;
 
   const isCommitNone = isNotCommit(date);
@@ -36,7 +44,18 @@ const CommitDateDialog = ({ open, setOpen, date, isNotCommit }: Props) => {
           <Suspense
             fallback={<SpinLoading size={"medium"} className="pt-20 pb-16" />}
           >
-            <CommitDateDialogDescription date={date} />
+            <div className="commit-data-table pt-3">
+              {fileCommitCounts.map(({ path, commitCount }) => (
+                <Link key={path} href={`/${path}`}>
+                  <div className="mb-2 pl-3 p-2 rounded-md border border-2 border-primary">
+                    <p className="md:text-md text-sm text-left">{path}</p>
+                    <p className="md:text-md text-sm text-left pl-6">
+                      👉 {commitCount}コミット
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </Suspense>
         </DialogContent>
       )}

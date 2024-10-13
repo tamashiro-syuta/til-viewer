@@ -1,8 +1,6 @@
-"use server";
-
 import { NewFileCommitsRepository } from "@/infra/dynamodb/file-commits";
 
-type PathAndCount = {
+export type PathAndCount = {
   path: string;
   commitCount: number;
 };
@@ -30,6 +28,41 @@ export async function getPathAndCountByDate(
     );
 
     return pathAndCountArray;
+  } catch (error) {
+    console.error("エラーが発生しました:", error);
+    throw error;
+  }
+}
+
+// NOTE: 日付ごとにどのファイルに何回コミットされたかを返す
+export async function getPathAndCountListGroupByDateForLastHalfYear(): Promise<
+  Record<string, PathAndCount[]>
+> {
+  try {
+    const today: Date = new Date();
+    const OneYearAgoDate: Date = new Date(
+      today.getFullYear(),
+      today.getMonth() - 6,
+      today.getDate()
+    );
+    const betweenDateList = await fileCommitsRepository.GetListBetweenDate(
+      OneYearAgoDate,
+      today
+    );
+    if (!betweenDateList) return {};
+
+    const pathAndCountListGroupByDate = betweenDateList.reduce(
+      (acc, { date, path, commitCount }) => {
+        if (!acc[date]) {
+          acc[date] = [];
+        }
+        acc[date].push({ path, commitCount });
+        return acc;
+      },
+      {} as Record<string, PathAndCount[]>
+    );
+
+    return pathAndCountListGroupByDate;
   } catch (error) {
     console.error("エラーが発生しました:", error);
     throw error;

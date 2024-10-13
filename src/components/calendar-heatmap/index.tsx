@@ -1,19 +1,23 @@
 "use client";
 
 import { Calendar } from "@/components/ui/calendar";
-import { cn, formatYYYYMMDDToDate } from "@/lib/utils";
-import { Button, buttonVariants } from "../ui/button";
+import { cn, formatDateToYYYYMMDD, formatYYYYMMDDToDate } from "@/lib/utils";
+import { buttonVariants } from "../ui/button";
 import { ja } from "date-fns/locale";
 import "./styles.css";
 import { useState } from "react";
 import CommitDateDialog from "./commitDateDialog";
-import { FileCommits } from "@/actions/file-commits";
+import { FileCommits, PathAndCount } from "@/usecases/file-commits";
 
 export interface Props {
   commitsCountAndDate: FileCommits;
+  pathAndCountListGroupByDate: Record<string, PathAndCount[]>;
 }
 
-const CalendarHeatmap = ({ commitsCountAndDate }: Props) => {
+const CalendarHeatmap = ({
+  commitsCountAndDate,
+  pathAndCountListGroupByDate,
+}: Props) => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const handleDateChange = (date: Date | null) => {
@@ -139,6 +143,11 @@ const CalendarHeatmap = ({ commitsCountAndDate }: Props) => {
         date={selectedDate}
         open={isDialogOpen}
         setOpen={setIsDialogOpen}
+        fileCommitCounts={
+          selectedDate
+            ? pathAndCountListGroupByDate[formatDateToYYYYMMDD(selectedDate)]
+            : []
+        }
         isNotCommit={isNotCommit}
       />
     </>
