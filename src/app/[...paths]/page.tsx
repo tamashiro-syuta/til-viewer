@@ -36,7 +36,7 @@ export default async function Page({
 
   const imageReplacedHtml = await replaceImageSrcInHtml(html);
 
-  s3: return (
+  return (
     <div className="pt-4">
       <div className="md:mb-12 text-center md:py-12 py-2 pt-5 bg-primary/20 px-0border border-gray-200 rounded-md">
         {title && <h1 className="text-2xl font-bold md:pb-6 pb-4">{title}</h1>}
