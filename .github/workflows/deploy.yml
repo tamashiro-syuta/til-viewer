@@ -26,4 +26,4 @@ jobs:
         aws-region: ${{env.AWS_REGION}}
         role-to-assume: ${{secrets.AWS_ROLE_ARN}}
     - name: Copy files to S3
-      run: aws s3 sync ${{env.SOURCE_DIR}} s3://${{env.AWS_S3_BUCKET}}/'
+      run: aws s3 sync ${{env.SOURCE_DIR}} s3://${{env.AWS_S3_BUCKET}}/
