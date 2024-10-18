@@ -101,7 +101,7 @@ export async function getDailyCountsForLastHalfYear(): Promise<FileCommits> {
 
 export async function createPathAndCount(input: CreateFileCommitInputSchema) {
   try {
-    const hoge = await fileCommitsRepository.Create(input);
+    await fileCommitsRepository.Create(input);
   } catch (error) {
     console.error("エラーが発生しました:", error);
     throw error;
@@ -112,7 +112,7 @@ export async function bulkCreatePathAndCount(
   inputs: CreateFileCommitInputSchema[]
 ) {
   try {
-    const hoge = await fileCommitsRepository.BulkCreate(inputs);
+    await fileCommitsRepository.BulkCreate(inputs);
   } catch (error) {
     console.error("エラーが発生しました:", error);
     throw error;
