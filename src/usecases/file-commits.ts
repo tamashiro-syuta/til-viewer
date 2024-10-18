@@ -1,3 +1,4 @@
+import { CreateFileCommitInputSchema } from "@/entity/file-commits.type";
 import { NewFileCommitsRepository } from "@/infra/dynamodb/file-commits";
 
 export type PathAndCount = {
@@ -92,6 +93,28 @@ export async function getDailyCountsForLastHalfYear(): Promise<FileCommits> {
         : fileCommit.commitCount;
     });
     return fairyCommits;
+  } catch (error) {
+    console.error("エラーが発生しました:", error);
+    throw error;
+  }
+}
+
+export async function createPathAndCount(input: CreateFileCommitInputSchema) {
+  try {
+    const hoge = await fileCommitsRepository.Create(input);
+    console.log("fileCommitsRepository.Create(input);", hoge);
+  } catch (error) {
+    console.error("エラーが発生しました:", error);
+    throw error;
+  }
+}
+
+export async function bulkCreatePathAndCount(
+  inputs: CreateFileCommitInputSchema[]
+) {
+  try {
+    const hoge = await fileCommitsRepository.BulkCreate(inputs);
+    console.log("fileCommitsRepository.BulkCreate(inputs);", hoge);
   } catch (error) {
     console.error("エラーが発生しました:", error);
     throw error;

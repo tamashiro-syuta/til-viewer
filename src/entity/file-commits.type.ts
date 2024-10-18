@@ -3,3 +3,9 @@ export type FileCommitsSchema = {
   path: string;
   commitCount: number;
 };
+
+export type CreateFileCommitInputSchema = {
+  date: Date;
+  path: string;
+  commitCount: number;
+};

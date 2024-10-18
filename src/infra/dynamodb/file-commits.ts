@@ -1,7 +1,15 @@
-import { FileCommitsSchema } from "@/entity/file-commits.type";
+import {
+  CreateFileCommitInputSchema,
+  FileCommitsSchema,
+} from "@/entity/file-commits.type";
 import { formatDateToYYYYMMDD } from "@/lib/utils";
 import { FileCommitsRepository } from "@/repository/file-commits";
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import {
+  BatchWriteItemCommand,
+  DynamoDBClient,
+  PutItemCommand,
+  WriteRequest,
+} from "@aws-sdk/client-dynamodb";
 import {
   DynamoDBDocumentClient,
   QueryCommand,
@@ -84,6 +92,68 @@ export class NewFileCommitsRepository implements FileCommitsRepository {
       return fileCommits;
     } catch (error) {
       console.error("Error:", error);
+    }
+  }
+
+  async Create({ date, path, commitCount }: CreateFileCommitInputSchema) {
+    const params = {
+      TableName: TABLE_NAME,
+      Item: {
+        date: { N: formatDateToYYYYMMDD(date).toString() }, // パーティションキー: 数値
+        path: { S: path }, // ソートキー: 文字列
+        commitCount: { N: commitCount.toString() }, // 数値フィールド
+      },
+    };
+
+    try {
+      const command = new PutItemCommand(params);
+      const response = await client.send(command);
+      console.log("Item created successfully:", response);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  }
+
+  async BulkCreate(items: CreateFileCommitInputSchema[]) {
+    const writeRequests: WriteRequest[] = items.map(
+      ({ date, path, commitCount }) => ({
+        PutRequest: {
+          Item: {
+            date: { N: formatDateToYYYYMMDD(date).toString() }, // パーティションキー: 数値
+            path: { S: path }, // ソートキー: 文字列
+            commitCount: { N: commitCount.toString() }, // 数値フィールド
+          },
+        },
+      })
+    );
+
+    try {
+      const command = new BatchWriteItemCommand({
+        RequestItems: {
+          [TABLE_NAME]: writeRequests,
+        },
+      });
+
+      const response = await client.send(command);
+
+      // UnprocessedItemsが返ってきた場合は再試行が必要
+      if (
+        response.UnprocessedItems &&
+        Object.keys(response.UnprocessedItems).length > 0
+      ) {
+        console.log("Retrying unprocessed items...");
+        await client.send(
+          new BatchWriteItemCommand({
+            RequestItems: response.UnprocessedItems,
+          })
+        );
+      }
+
+      console.log("Bulk insert completed successfully:", response);
+    } catch (error) {
+      console.error("Error during bulk insert:", error);
+      throw error;
     }
   }
 }
