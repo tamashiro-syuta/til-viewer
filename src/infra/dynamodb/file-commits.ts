@@ -43,8 +43,6 @@ export class NewFileCommitsRepository implements FileCommitsRepository {
 
     try {
       const data = await ddbDocClient.send(new QueryCommand(params));
-      console.log("result : " + JSON.stringify(data));
-
       const fileCommits = data.Items?.map((item) => {
         const fileCommit: FileCommitsSchema = {
           date: item.date,
@@ -108,7 +106,6 @@ export class NewFileCommitsRepository implements FileCommitsRepository {
     try {
       const command = new PutItemCommand(params);
       const response = await client.send(command);
-      console.log("Item created successfully:", response);
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -142,15 +139,12 @@ export class NewFileCommitsRepository implements FileCommitsRepository {
         response.UnprocessedItems &&
         Object.keys(response.UnprocessedItems).length > 0
       ) {
-        console.log("Retrying unprocessed items...");
         await client.send(
           new BatchWriteItemCommand({
             RequestItems: response.UnprocessedItems,
           })
         );
       }
-
-      console.log("Bulk insert completed successfully:", response);
     } catch (error) {
       console.error("Error during bulk insert:", error);
       throw error;
