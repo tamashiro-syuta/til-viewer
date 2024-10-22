@@ -1,32 +1,17 @@
 "use client";
 
 import { Calendar } from "@/components/ui/calendar";
-import { cn, formatDateToYYYYMMDD, formatYYYYMMDDToDate } from "@/lib/utils";
+import { cn, formatYYYYMMDDToDate } from "@/lib/utils";
 import { buttonVariants } from "../ui/button";
 import { ja } from "date-fns/locale";
 import "./styles.css";
-import { useState } from "react";
-import CommitDateDialog from "./commitDateDialog";
-import { FileCommits, PathAndCount } from "@/usecases/file-commits";
+import { FileCommits } from "@/usecases/file-commits";
 
 export interface Props {
   commitsCountAndDate: FileCommits;
-  pathAndCountListGroupByDate: Record<string, PathAndCount[]>;
 }
 
-const CalendarHeatmap = ({
-  commitsCountAndDate,
-  pathAndCountListGroupByDate,
-}: Props) => {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const handleDateChange = (date: Date | null) => {
-    setSelectedDate(date);
-    if (date) {
-      setIsDialogOpen(true); // 日付が選択されたらダイアログを開く
-    }
-  };
-
+const CalendarHeatmap = ({ commitsCountAndDate }: Props) => {
   // NOTE: コミット数に応じてランク付け
   const [NONE, LOW, MIDDLE, HIGH] = [0, 1, 3, 5];
   const isCommitNone = (count: number) => count === NONE;
@@ -54,29 +39,12 @@ const CalendarHeatmap = ({
   };
 
   const commonStyle = "text-white hover:text-white";
-  const committedCommonStyle = "transition hover:duration-300 hover:scale-110";
   const modifiersClassNames = {
     none: cn(commonStyle, "bg-green-50 hover:bg-green-50"),
-    low: cn(
-      commonStyle,
-      committedCommonStyle,
-      "bg-green-300 hover:bg-green-300"
-    ),
-    middle: cn(
-      commonStyle,
-      committedCommonStyle,
-      "bg-green-500 hover:bg-green-500"
-    ),
-    high: cn(
-      commonStyle,
-      committedCommonStyle,
-      "bg-green-700 hover:bg-green-700"
-    ),
-    extreme: cn(
-      commonStyle,
-      committedCommonStyle,
-      "bg-green-900 hover:bg-green-900"
-    ),
+    low: cn(commonStyle, "bg-green-300 hover:bg-green-300"),
+    middle: cn(commonStyle, "bg-green-500 hover:bg-green-500"),
+    high: cn(commonStyle, "bg-green-700 hover:bg-green-700"),
+    extreme: cn(commonStyle, "bg-green-900 hover:bg-green-900"),
   };
 
   const visibleMonths = 6;
@@ -86,20 +54,6 @@ const CalendarHeatmap = ({
     today.getMonth() - visibleMonths,
     1
   );
-
-  const isNotCommit = (date: Date | null): boolean => {
-    if (!date) return true;
-
-    const foundObject = Object.entries(commitsCountAndDate).find(
-      ([key, _value]) => {
-        return formatYYYYMMDDToDate(key).toDateString() === date.toDateString();
-      }
-    );
-
-    const COUNT_INDEX = 1;
-    if (!foundObject || foundObject[COUNT_INDEX] === NONE) return true;
-    return false;
-  };
 
   return (
     <>
@@ -136,20 +90,8 @@ const CalendarHeatmap = ({
             Head: () => <></>,
             Caption: () => <></>,
           }}
-          onDayClick={(date) => handleDateChange(date)}
         />
       </div>
-      <CommitDateDialog
-        date={selectedDate}
-        open={isDialogOpen}
-        setOpen={setIsDialogOpen}
-        fileCommitCounts={
-          selectedDate
-            ? pathAndCountListGroupByDate[formatDateToYYYYMMDD(selectedDate)]
-            : []
-        }
-        isNotCommit={isNotCommit}
-      />
     </>
   );
 };
