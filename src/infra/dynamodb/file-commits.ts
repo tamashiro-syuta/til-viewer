@@ -105,7 +105,7 @@ export class NewFileCommitsRepository implements FileCommitsRepository {
 
     try {
       const command = new PutItemCommand(params);
-      const response = await client.send(command);
+      await client.send(command);
     } catch (error) {
       console.error("Error:", error);
       throw error;
