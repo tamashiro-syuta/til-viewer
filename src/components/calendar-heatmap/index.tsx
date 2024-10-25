@@ -6,6 +6,7 @@ import { buttonVariants } from "../ui/button";
 import { ja } from "date-fns/locale";
 import "./styles.css";
 import { FileCommits } from "@/usecases/file-commits";
+import { CustomRow } from "./custom-row";
 
 export interface Props {
   commitsCountAndDate: FileCommits;
@@ -89,6 +90,7 @@ const CalendarHeatmap = ({ commitsCountAndDate }: Props) => {
           components={{
             Head: () => <></>,
             Caption: () => <></>,
+            Row: (props) => <CustomRow {...props} />,
           }}
         />
       </div>
