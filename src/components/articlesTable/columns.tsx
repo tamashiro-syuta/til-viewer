@@ -51,26 +51,4 @@ export const columns: ColumnDef<ArticlePathAndDateWithFrontMatter>[] = [
       return tags.map((tag) => <Chip key={tag} label={tag} />);
     },
   },
-  {
-    accessorKey: "date",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          コミット日
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-    cell: ({ row }) => {
-      const date = new Date(row.getValue("date"));
-      const yyyy = String(date.getFullYear());
-      const mm = String(date.getMonth() + 1).padStart(2, "0");
-      const dd = String(date.getDate()).padStart(2, "0");
-
-      return <div className="capitalize">{`${yyyy}/${mm}/${dd}`}</div>;
-    },
-  },
 ];

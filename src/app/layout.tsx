@@ -22,7 +22,7 @@ export default function RootLayout({
       <body className={`${inter.className} bg-secondary/50`}>
         <Providers>
           <AppBar />
-          <div className="container mx-auto sm:px-4 px-2 bg-white min-h-screen">
+          <div className="mx-auto sm:px-8 px-2 bg-white min-h-screen">
             {children}
           </div>
         </Providers>

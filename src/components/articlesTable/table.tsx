@@ -30,14 +30,11 @@ import { getAllArticlesSortByCommittedAt } from "@/lib/repository";
 export default function Table() {
   const { data } = useQuery({
     queryKey: ["articles"],
-    queryFn: () => getAllArticlesSortByCommittedAt(),
+    queryFn: async () => await getAllArticlesSortByCommittedAt(),
   });
 
   const router = useRouter();
-  const [sorting, setSorting] = React.useState<SortingState>([
-    // NOTE: デフォルトで更新日順にソート
-    { id: "date", desc: true },
-  ]);
+  const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
@@ -70,7 +67,6 @@ export default function Table() {
   React.useEffect(() => {
     setColumnVisibility({
       ...columnVisibility,
-      date: self.innerWidth > 768,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -109,8 +105,6 @@ export default function Table() {
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => {
-                const href = row.getValue("path") as string | undefined;
-
                 return (
                   <TableRow
                     key={row.id}
@@ -120,7 +114,8 @@ export default function Table() {
                       <TableCell
                         key={cell.id}
                         onClick={() => {
-                          if (href !== undefined) router.push(href);
+                          const path = row.getValue("path") as string;
+                          router.push(path.replace("TIL/", ""));
                         }}
                         className={i === 0 ? "md:pl-6 pl-2" : ""}
                       >

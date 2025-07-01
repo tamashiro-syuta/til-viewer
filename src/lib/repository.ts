@@ -1,39 +1,54 @@
-import matter from "gray-matter";
-import { Octokit } from "@octokit/rest";
-import {
-  mockArticles,
-  mockPathAndDateWithFrontMatters,
-} from "./mock-repository";
+"use server";
 
-const apiToken = process.env.GITHUB_API_ACCESS_TOKEN;
-const BASE_URL = "https://api.github.com/repos/tamashiro-syuta/TIL";
+import fs from "fs";
+import matter from "gray-matter";
+import path from "path";
+
+const TARGET_PATH = "TIL";
 const excludeNames = ["README.md", "image", "create_md.sh"];
 
-const octokit = new Octokit({
-  auth: apiToken,
-});
-
 export async function fetchAllArticles() {
-  if (process.env.NODE_ENV === "development") return mockArticles;
-
   try {
-    const sha1 = await fetchTreeSha1();
-    const url = `${BASE_URL}/git/trees/${sha1}?recursive=1`;
-    const res = await fetch(url, {
-      headers: {
-        Accept: "application/vnd.github+json",
-        Authorization: `Bearer ${apiToken}`,
-        "X-GitHub-Api-Version": "2022-11-28",
-      },
-      next: { revalidate: false },
-    }).then((res) => {
-      return res.json();
-    });
+    // TILディレクトリのパスを取得
+    const tilDirPath = path.join(process.cwd(), TARGET_PATH);
 
-    const articles = res.tree
-      .filter((item: any) => item.path.endsWith(".md") && item.type === "blob")
-      .filter((item: any) => !excludeNames.includes(item.path))
-      .map((item: any) => item.path) as string[];
+    // ディレクトリが存在するか確認
+    if (!fs.existsSync(tilDirPath)) {
+      console.error("TILディレクトリが存在しません");
+      return [];
+    }
+
+    // 再帰的にすべてのMarkdownファイルを取得する関数
+    const getAllMarkdownFiles = (
+      dirPath: string,
+      basePath: string = ""
+    ): string[] => {
+      let results: string[] = [];
+      const items = fs.readdirSync(dirPath);
+
+      for (const item of items) {
+        const itemPath = path.join(dirPath, item);
+        const relativePath = basePath ? path.join(basePath, item) : item;
+
+        // 除外するファイル・ディレクトリをスキップ
+        if (excludeNames.includes(item)) continue;
+
+        const stat = fs.statSync(itemPath);
+
+        if (stat.isDirectory()) {
+          // ディレクトリの場合は再帰的に検索
+          results = results.concat(getAllMarkdownFiles(itemPath, relativePath));
+        } else if (item.endsWith(".md")) {
+          // Markdownファイルの場合は結果に追加
+          results.push(relativePath);
+        }
+      }
+
+      return results;
+    };
+
+    // すべてのMarkdownファイルのパスを取得
+    const articles = getAllMarkdownFiles(tilDirPath);
 
     return articles;
   } catch (error) {
@@ -42,90 +57,64 @@ export async function fetchAllArticles() {
   }
 }
 
-// 指定ディレクトリのファイルツリーを取得
-async function getRepoTree() {
-  try {
-    const { data: refData } = await octokit.git.getRef({
-      owner: "tamashiro-syuta",
-      repo: "TIL",
-      ref: `heads/main`,
-    });
-
-    const { data: treeData } = await octokit.git.getTree({
-      owner: "tamashiro-syuta",
-      repo: "TIL",
-      tree_sha: refData.object.sha,
-      recursive: "true", // 再帰的に全てのファイルを取得
-    });
-
-    return treeData.tree;
-  } catch (error) {
-    console.error("エラーが発生しました:", error);
-  }
-}
-
 export interface ArticlePathAndDateWithFrontMatter
   extends Partial<FrontMatter> {
   path: string;
-  date: Date;
 }
 
 export async function getAllArticlesSortByCommittedAt(): Promise<
   ArticlePathAndDateWithFrontMatter[] | undefined
 > {
-  if (process.env.NODE_ENV === "development")
-    return mockPathAndDateWithFrontMatters;
-
   try {
-    const repoTree = await getRepoTree();
+    const tilDirPath = path.join(process.cwd(), TARGET_PATH);
+    if (!fs.existsSync(tilDirPath)) {
+      throw new Error("not found TIL directory");
+    }
 
-    // Markdownファイル（.md拡張子）のみをフィルタリング
-    const markdownFiles = repoTree?.filter((file) =>
-      file.path?.endsWith(".md")
-    );
+    // 再帰的にすべてのMarkdownファイルを取得する関数
+    const getAllMarkdownFiles = (
+      dirPath: string,
+      basePath: string = ""
+    ): string[] => {
+      let results: string[] = [];
+      const items = fs.readdirSync(dirPath);
 
-    if (!markdownFiles) return;
+      for (const item of items) {
+        const itemPath = path.join(dirPath, item);
+        const relativePath = basePath ? path.join(basePath, item) : item;
 
-    const PathAndDate = await Promise.all(
-      markdownFiles.map(async (file) => {
-        const commits = await octokit.repos.listCommits({
-          owner: "tamashiro-syuta",
-          repo: "TIL",
-          path: file.path,
-          sha: "main",
-          per_page: 1, // 最新のコミットのみ取得
-        });
+        // 除外するファイル・ディレクトリをスキップ
+        if (excludeNames.includes(item)) continue;
 
-        if (commits.data.length > 0) {
-          const commitDate = commits.data[0].commit.committer?.date;
-          const commitPath = file.path;
-          if (!commitDate || !commitPath) return;
+        const stat = fs.statSync(itemPath);
 
-          return {
-            path: commitPath,
-            date: new Date(commitDate),
-          };
+        if (stat.isDirectory()) {
+          // ディレクトリの場合は再帰的に検索
+          results = results.concat(getAllMarkdownFiles(itemPath, relativePath));
+        } else if (item.endsWith(".md")) {
+          // Markdownファイルの場合は結果に追加
+          results.push(relativePath);
         }
-      })
-    );
+      }
 
-    const filteredPathAndDate = PathAndDate.filter((i) => i !== undefined);
-    const PathAndDateWithFrontMatters = await Promise.all(
-      filteredPathAndDate.map(async ({ path, date }) => {
+      return results;
+    };
+
+    const markdownFiles = getAllMarkdownFiles(tilDirPath);
+    if (!markdownFiles.length) return [];
+
+    return await Promise.all(
+      markdownFiles.map(async (relativePath) => {
+        const filePath = path.join(TARGET_PATH, relativePath);
         const frontMatter = await fetchSingleArticleFrontMatter({
-          paths: path.split("/"),
+          paths: relativePath.split("/"),
         });
 
         return {
-          path,
-          date,
+          path: filePath,
           ...frontMatter,
         };
       })
-    );
-
-    return PathAndDateWithFrontMatters.sort(
-      (a, b) => b.date.getTime() - a.date.getTime()
     );
   } catch (error) {
     console.error("エラーが発生しました:", error);
@@ -137,38 +126,50 @@ interface fetchSingleArticleProps {
 }
 
 type fetchSingleArticleResponse = {
+  title: string;
+  tags: string[];
   content: string;
   status: 200 | 404; // NOTE: 一旦、200か404のみを想定
 };
 
-// NOTE: 引数のパスから、記事の内容を取得し、markdown形式で返す
-export async function fetchSingleArticle({
+// NOTE: 引数のパスから、ローカルの記事の内容を取得し、markdown形式で返す
+export async function fetchSingleArticleFromLocal({
   paths,
 }: fetchSingleArticleProps): Promise<fetchSingleArticleResponse> {
-  try {
-    const url = `${BASE_URL}/contents/${paths.join("/")}`;
-    const res = await fetch(url, {
-      headers: {
-        Accept: "application/vnd.github+json",
-        Authorization: `Bearer ${apiToken}`,
-        "X-GitHub-Api-Version": "2022-11-28",
-      },
-      next: { revalidate: false },
-    }).then((res) => {
-      return res.json();
-    });
+  const excludeFileHeads = [".well-known"];
+  if (paths.length > 0 && excludeFileHeads.includes(paths[0])) {
+    return {
+      title: "",
+      tags: [],
+      content: "",
+      status: 404,
+    };
+  }
 
-    // NOTE: 記事が見つからない場合は、404を返す
-    if (res.status === "404") {
+  try {
+    // TILディレクトリからのパスを作成
+    const filePath = path.join(process.cwd(), TARGET_PATH, ...paths);
+
+    // ファイルが存在するか確認
+    if (!fs.existsSync(filePath)) {
       return {
+        title: "",
+        tags: [],
         content: "",
         status: 404,
       };
     }
 
-    const decodedContent = Buffer.from(res.content, "base64").toString();
+    // ファイルの内容を読み込む
+    const content = fs.readFileSync(filePath, "utf8");
+    const matteredContent = matter(content);
+    const title: string = matteredContent.data.title || "";
+    const tags: string[] = matteredContent.data.tags || [];
+
     return {
-      content: decodedContent,
+      title,
+      tags,
+      content: matteredContent.content,
       status: 200,
     };
   } catch (error) {
@@ -186,84 +187,15 @@ export async function fetchSingleArticleFrontMatter({
   paths,
 }: fetchSingleArticleProps): Promise<FrontMatter | null> {
   try {
-    const { content, status } = await fetchSingleArticle({ paths });
+    const { title, tags, status } = await fetchSingleArticleFromLocal({
+      paths,
+    });
     if (status === 404) return null;
-
-    const matteredContent = matter(content, {});
-    const title: string = matteredContent?.data?.title || "";
-    const tags: string[] = matteredContent?.data?.tags || [];
 
     return {
       title,
       tags,
-    } as FrontMatter;
-  } catch (error) {
-    console.error("エラーが発生しました:", error);
-    throw error;
-  }
-}
-
-export async function fetchLastHalfYearsCommitCountByDate() {
-  // 2ヶ月前の1日から、今日までの正確な日数を取得
-  const today: Date = new Date();
-  const OneYearAgoDate: Date = new Date(
-    today.getFullYear(),
-    today.getMonth() - 6,
-    today.getDate()
-  );
-
-  try {
-    let page = 1;
-    let hasMore = true;
-    const per_page = 100;
-    const commitsCountByDate: { [key: string]: number } = {};
-
-    while (hasMore) {
-      const { data } = await octokit.repos.listCommits({
-        owner: "tamashiro-syuta",
-        repo: "TIL",
-        per_page, // NOTE: 1ページあたり100件取得
-        page, // NOTE: ページ番号を指定
-        since: OneYearAgoDate.toISOString(),
-      });
-
-      // データを全体の配列に追加
-      data.map((commit) => {
-        if (!commit.commit.author?.date) return;
-
-        const date = new Date(commit.commit.author.date).toLocaleDateString();
-        commitsCountByDate[date] = commitsCountByDate[date]
-          ? commitsCountByDate[date] + 1
-          : 1;
-      });
-
-      // NOTE: 次のページが存在すれば、ページ数をインクリメント、存在しなければ終了
-      data.length < per_page ? (hasMore = false) : page++;
-    }
-
-    return commitsCountByDate;
-  } catch (error) {
-    console.error("エラーが発生しました:", error);
-    throw error;
-  }
-}
-
-// NOTE: private関数
-async function fetchTreeSha1() {
-  try {
-    const url = `${BASE_URL}/branches/main`;
-    const res = await fetch(url, {
-      headers: {
-        Accept: "application/vnd.github+json",
-        Authorization: `Bearer ${apiToken}`,
-        "X-GitHub-Api-Version": "2022-11-28",
-      },
-      next: { revalidate: false },
-    }).then((res) => {
-      return res.json();
-    });
-
-    return res.commit.sha;
+    };
   } catch (error) {
     console.error("エラーが発生しました:", error);
     throw error;

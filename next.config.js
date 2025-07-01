@@ -12,9 +12,7 @@ const withPWA = require("@ducanh2912/next-pwa").default({
 });
 
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-  output: 'export'
-};
+const nextConfig = {};
 
 // export default withPWA(nextConfig);
 module.exports = withPWA(nextConfig);

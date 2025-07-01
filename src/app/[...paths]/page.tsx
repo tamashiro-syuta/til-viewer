@@ -1,10 +1,11 @@
 import markdownToHtml from "zenn-markdown-html";
 import "zenn-content-css";
 import { notFound } from "next/navigation";
-import matter from "gray-matter";
-import { fetchAllArticles, fetchSingleArticle } from "@/lib/repository";
+import {
+  fetchAllArticles,
+  fetchSingleArticleFromLocal,
+} from "@/lib/repository";
 import Chip from "@/components/chip";
-import replaceImageSrcInHtml from "@/lib/replaceImageSrcInHtml";
 
 export const generateStaticParams = async () => {
   const articles = await fetchAllArticles();
@@ -20,21 +21,17 @@ export default async function Page({
 }: {
   params: { paths: string[] };
 }) {
-  const { content, status } = await fetchSingleArticle({ paths: params.paths });
+  // NOTE: matteredContent.data → { title: '初めてのGo言語 ~ Chapter1 ~', tags: [ 'Go' ] }
+  const { title, tags, content, status } = await fetchSingleArticleFromLocal({
+    paths: params.paths,
+  });
 
   // NOTE: 記事が見当たらない場合は、404ページを表示
   if (status === 404) notFound();
 
-  // NOTE: matteredContent.data → { title: '初めてのGo言語 ~ Chapter1 ~', tags: [ 'Go' ] }
-  const matteredContent = matter(content, {});
-  const title: string = matteredContent?.data?.title || "";
-  const tags: string[] = matteredContent?.data?.tags || [];
-
-  const html = markdownToHtml(matteredContent.content, {
+  const html = markdownToHtml(content, {
     embedOrigin: "https://embed.zenn.studio",
   });
-
-  const imageReplacedHtml = await replaceImageSrcInHtml(html);
 
   return (
     <div className="pt-4">
@@ -47,7 +44,7 @@ export default async function Page({
       <div
         className="znc md:border md:border-gray-200 md:rounded-md md:p-6 pt-6"
         dangerouslySetInnerHTML={{
-          __html: imageReplacedHtml,
+          __html: html,
         }}
       />
     </div>
